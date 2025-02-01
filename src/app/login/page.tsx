@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { useRouter } from 'next/navigation';
 import { useLogin } from '../../hooks/useAuth';
+import { setCookie } from 'cookies-next';
 
 export default function Login() {
   const [password, setPassword] = useState("");
@@ -14,7 +15,7 @@ export default function Login() {
   const router = useRouter();
   
   const loginMutation = useLogin();
-  
+
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   };
@@ -28,7 +29,7 @@ export default function Login() {
 
     const response = await loginMutation.mutateAsync({ email, password });
 
-    localStorage.setItem('token', response.token);
+    setCookie('token', response.token);
 
     router.push('/');
   };
