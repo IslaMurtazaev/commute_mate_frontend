@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import RidesList from '../components/rides-list';
 
 export default async function Home() {
   const cookieStore = await cookies();
@@ -8,7 +9,5 @@ export default async function Home() {
     redirect('/login');
   }
 
-  return (
-    <h1>Commute Mate</h1>
-  );
+  return <RidesList />;
 }

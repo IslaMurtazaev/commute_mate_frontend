@@ -18,16 +18,16 @@ export function useLogin() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            username: credentials.email,
-            password: credentials.password
+          username: credentials.email,
+          password: credentials.password,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error('Login failed');
       }
-      
+
       return response.json() as Promise<LoginResponse>;
     },
   });
-} 
+}
