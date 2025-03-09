@@ -10,12 +10,12 @@ import { useQuery } from '@tanstack/react-query';
 import { formatDateTime } from '../utils/utils';
 import Container from '@mui/material/Container';
 import Link from 'next/link';
-import { fetchRides, RideRequest } from '../api/ride-requests';
+import { fetchRideRequests, RideRequest } from '../api/ride-requests';
 
 export default function RidesList() {
   const { isLoading, isError, data, error } = useQuery({
     queryKey: ['ride-requests'],
-    queryFn: fetchRides,
+    queryFn: fetchRideRequests,
   });
 
   if (isLoading) {
