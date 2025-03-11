@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import Map from '../../../components/Map';
+import Map from '../../../components/map/map';
 import { formatDateTime } from '../../../utils/utils';
 
 export default function RideRequestPage() {
@@ -55,23 +55,20 @@ export default function RideRequestPage() {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Paper elevation={3}>
-        {/* Map Section */}
         <Box sx={{ height: 300, width: '100%', position: 'relative' }}>
           <Map
-            startLocation={{
-              lat: parseFloat(ride.start_latitude),
-              lng: parseFloat(ride.start_longitude),
-            }}
-            endLocation={{
-              lat: parseFloat(ride.destination_latitude),
-              lng: parseFloat(ride.destination_longitude),
-            }}
+            startCoordinates={[
+              parseFloat(ride.start_longitude),
+              parseFloat(ride.start_latitude),
+            ]}
+            endCoordinates={[
+              parseFloat(ride.destination_longitude),
+              parseFloat(ride.destination_latitude),
+            ]}
           />
         </Box>
 
-        {/* Content Section */}
         <Box sx={{ p: 3 }}>
-          {/* Creator Info */}
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Avatar
               sx={{ width: 56, height: 56, mr: 2 }}
@@ -91,7 +88,6 @@ export default function RideRequestPage() {
 
           <Divider sx={{ my: 2 }} />
 
-          {/* Location Details */}
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <LocationOnIcon color="primary" sx={{ mr: 1 }} />
@@ -116,7 +112,6 @@ export default function RideRequestPage() {
             </Box>
           </Box>
 
-          {/* Time Details */}
           <Box sx={{ mb: 3 }}>
             <Typography variant="body2" color="text.secondary">
               Departure
@@ -126,7 +121,6 @@ export default function RideRequestPage() {
             </Typography>
           </Box>
 
-          {/* Notes if any */}
           {ride.note && (
             <Box sx={{ mb: 3 }}>
               <Typography variant="body2" color="text.secondary">
@@ -136,7 +130,6 @@ export default function RideRequestPage() {
             </Box>
           )}
 
-          {/* Contact Button */}
           <Button
             variant="contained"
             fullWidth
