@@ -33,6 +33,14 @@ function Map({ startCoordinates, endCoordinates }: MapProps) {
       style: 'mapbox://styles/mapbox/streets-v11',
       bounds: bounds,
       fitBoundsOptions: { padding: 40 },
+      // Disable all interactions
+      dragPan: false,
+      dragRotate: false,
+      scrollZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      interactive: false,
     });
 
     mapRef.current = map;
