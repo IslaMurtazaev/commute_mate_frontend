@@ -21,7 +21,7 @@ export interface RideRequest {
 export const fetchRideRequests = async (): Promise<RideRequest[]> => {
   const response = await fetch('http://localhost:8000/rides/requests/');
   if (!response.ok) {
-    throw new Error('Failed to fetch rides');
+    throw new Error('Failed to fetch ride requests');
   }
 
   return await response.json();
@@ -30,7 +30,23 @@ export const fetchRideRequests = async (): Promise<RideRequest[]> => {
 export const fetchRideRequest = async (id: string): Promise<RideRequest> => {
   const response = await fetch(`http://localhost:8000/rides/requests/${id}/`);
   if (!response.ok) {
-    throw new Error('Failed to fetch ride');
+    throw new Error('Failed to fetch ride request');
   }
+  return await response.json();
+};
+
+export const createRideRequest = async (rideRequest: any, token: string) => {
+  const response = await fetch('http://localhost:8000/rides/requests/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Token ${token}`,
+    },
+    body: JSON.stringify(rideRequest),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create ride request');
+  }
+
   return await response.json();
 };
