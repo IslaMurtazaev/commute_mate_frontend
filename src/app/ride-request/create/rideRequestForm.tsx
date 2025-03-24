@@ -1,78 +1,45 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createRideRequest } from '../../../api/ride-requests';
-
-interface Location {
-  place_name: string;
-  center: [number, number];
-}
+import SearchLocation, { Location } from './searchLocation';
+import { fetchLocationCoordinates } from '@/src/api/mapboxApi';
 
 export default function CreateRideRequest({ token }: { token: string }) {
   const router = useRouter();
-  const [startSearch, setStartSearch] = useState('');
-  const [endSearch, setEndSearch] = useState('');
-  const [startSuggestions, setStartSuggestions] = useState<Location[]>([]);
-  const [endSuggestions, setEndSuggestions] = useState<Location[]>([]);
-  const [selectedStart, setSelectedStart] = useState<Location | null>(null);
-  const [selectedEnd, setSelectedEnd] = useState<Location | null>(null);
+  const [startLocation, setStartLocation] = useState<Location | null>(null);
+  const [endLocation, setEndLocation] = useState<Location | null>(null);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
 
-  const searchLocations = async (query: string, isStart: boolean) => {
-    if (!query) {
-      isStart ? setStartSuggestions([]) : setEndSuggestions([]);
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-          query
-        )}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_API_KEY}&country=US`
-      );
-      const data = await response.json();
-      const locations = data.features.map((feature: any) => ({
-        place_name: feature.place_name,
-        center: feature.center,
-      }));
-      isStart ? setStartSuggestions(locations) : setEndSuggestions(locations);
-    } catch (error) {
-      console.error('Error fetching locations:', error);
-    }
-  };
-
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      searchLocations(startSearch, true);
-    }, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [startSearch]);
-
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      searchLocations(endSearch, false);
-    }, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [endSearch]);
+  const sessionToken = crypto.randomUUID();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedStart || !selectedEnd || !startTime || !endTime) {
+    if (!startLocation || !endLocation || !startTime || !endTime) {
       alert('Please fill in all fields');
       return;
     }
 
+    const startLocationCoordinates = await fetchLocationCoordinates(
+      startLocation.id,
+      sessionToken
+    );
+    const endLocationCoordinates = await fetchLocationCoordinates(
+      endLocation.id,
+      sessionToken
+    );
+
     const rideRequest = {
       creator_type: 'passenger',
-      start_location: selectedStart.place_name,
-      start_latitude: selectedStart.center[1].toString(),
-      start_longitude: selectedStart.center[0].toString(),
-      destination_location: selectedEnd.place_name,
-      destination_latitude: selectedEnd.center[1].toString(),
-      destination_longitude: selectedEnd.center[0].toString(),
+      start_location: startLocation.address,
+      start_latitude: startLocationCoordinates.latitude,
+      start_longitude: startLocationCoordinates.longitude,
+      destination_location: endLocation.address,
+      destination_latitude: endLocationCoordinates.latitude,
+      destination_longitude: endLocationCoordinates.longitude,
       start_time: new Date(startTime).toISOString(),
       end_time: new Date(endTime).toISOString(),
       status: 'new',
@@ -93,79 +60,20 @@ export default function CreateRideRequest({ token }: { token: string }) {
       <h1 className="text-2xl font-bold mb-6">Create Ride Request</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Start Location */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">Start Location</label>
-          <input
-            type="text"
-            value={startSearch}
-            onChange={(e) => setStartSearch(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Search start location..."
-          />
-          {startSuggestions.length > 0 && (
-            <ul className="mt-2 border rounded bg-white shadow-lg max-h-48 overflow-auto">
-              {startSuggestions.map((location, index) => (
-                <li
-                  key={index}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => {
-                    setSelectedStart(location);
-                    setStartSearch(location.place_name);
-                    setStartSuggestions([]);
-                  }}
-                >
-                  {location.place_name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <label className="block text-sm font-medium">Start Location</label>
+        <SearchLocation
+          onSelect={setStartLocation}
+          sessionToken={sessionToken}
+        />
 
         {/* End Location */}
         <div className="space-y-2">
           <label className="block text-sm font-medium">End Location</label>
-          <input
-            type="text"
-            value={endSearch}
-            onChange={(e) => setEndSearch(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Search destination..."
+          <SearchLocation
+            onSelect={setEndLocation}
+            sessionToken={sessionToken}
           />
-          {endSuggestions.length > 0 && (
-            <ul className="mt-2 border rounded bg-white shadow-lg max-h-48 overflow-auto">
-              {endSuggestions.map((location, index) => (
-                <li
-                  key={index}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => {
-                    setSelectedEnd(location);
-                    setEndSearch(location.place_name);
-                    setEndSuggestions([]);
-                  }}
-                >
-                  {location.place_name}
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
-
-        {/* Map Display */}
-        {/* {selectedStart && selectedEnd && (
-          <div className="h-64 mb-6">
-            <Map
-              startCoordinates={[
-                parseFloat(selectedStart.center[0]),
-                parseFloat(selectedStart.center[1]),
-              ]}
-              endCoordinates={[
-                parseFloat(selectedEnd.center[0]),
-                parseFloat(selectedEnd.center[1]),
-              ]}
-            />
-          </div>
-        )} */}
 
         {/* Time Selection */}
         <div className="grid grid-cols-2 gap-4">

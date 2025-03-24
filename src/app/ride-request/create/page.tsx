@@ -11,3 +11,4 @@ export default async function Home() {
 
   return <RideRequestForm token={token.value} />;
 }
+
