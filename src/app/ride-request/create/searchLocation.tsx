@@ -80,7 +80,6 @@ export default function SearchLocation({
             <Paper
               elevation={0}
               sx={{
-                p: 1,
                 width: '100%',
                 '&:hover': {
                   backgroundColor: 'transparent',

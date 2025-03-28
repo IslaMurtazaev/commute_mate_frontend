@@ -65,7 +65,7 @@ export default function CreateRideRequest({ token }: { token: string }) {
 
   return (
     <Container maxWidth="md">
-      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Create Ride Request
         </Typography>
