@@ -13,7 +13,6 @@ import {
   TextField,
   Button,
   Paper,
-  Grid,
 } from '@mui/material';
 
 export default function CreateRideRequest({ token }: { token: string }) {
@@ -44,10 +43,10 @@ export default function CreateRideRequest({ token }: { token: string }) {
 
     const rideRequest = {
       creator_type: 'passenger',
-      start_location: startLocation.address,
+      start_location: startLocation.name,
       start_latitude: startLocationCoordinates.latitude,
       start_longitude: startLocationCoordinates.longitude,
-      destination_location: endLocation.address,
+      destination_location: endLocation.name,
       destination_latitude: endLocationCoordinates.latitude,
       destination_longitude: endLocationCoordinates.longitude,
       start_time: new Date(startTime).toISOString(),
