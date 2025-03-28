@@ -2,6 +2,7 @@
 
 import { fetchLocationSuggestions } from '@/src/api/mapboxApi';
 import { useState, useEffect } from 'react';
+import { Autocomplete, TextField, Paper, Box, Typography } from '@mui/material';
 
 export type Location = {
   name: string;
@@ -12,11 +13,17 @@ export type Location = {
 type Props = {
   onSelect: (location: Location) => void;
   sessionToken: string;
+  label: string;
 };
 
-export default function SearchLocation({ onSelect, sessionToken }: Props) {
+export default function SearchLocation({
+  onSelect,
+  sessionToken,
+  label,
+}: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const searchLocations = async (query: string) => {
     if (!query) {
@@ -24,13 +31,20 @@ export default function SearchLocation({ onSelect, sessionToken }: Props) {
       return;
     }
 
-    const data = await fetchLocationSuggestions(query, sessionToken);
-    const locations = data.suggestions.map((suggestion: any) => ({
-      name: suggestion.name,
-      address: suggestion.place_formatted,
-      id: suggestion.mapbox_id,
-    }));
-    setSuggestions(locations);
+    setLoading(true);
+    try {
+      const data = await fetchLocationSuggestions(query, sessionToken);
+      const locations = data.suggestions.map((suggestion: any) => ({
+        name: suggestion.name,
+        address: suggestion.place_formatted,
+        id: suggestion.mapbox_id,
+      }));
+      setSuggestions(locations);
+    } catch (error) {
+      console.error('Error fetching locations:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -40,33 +54,53 @@ export default function SearchLocation({ onSelect, sessionToken }: Props) {
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
 
-  const handleSelect = (location: Location) => {
-    onSelect(location);
-    setSuggestions([]);
-  };
-
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <input
-        type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full p-2 border rounded"
-        placeholder="Search destination..."
-      />
-      {suggestions.length > 0 && (
-        <ul className="mt-2 border rounded bg-white shadow-lg max-h-48 overflow-auto">
-          {suggestions.map((location) => (
-            <li
-              key={location.id}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleSelect(location)}
+    <Box sx={{ width: '100%' }}>
+      <Autocomplete
+        fullWidth
+        options={suggestions}
+        loading={loading}
+        filterOptions={(x) => x} // Disable built-in filtering as we're using API
+        getOptionLabel={(option) => option.name}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        noOptionsText="No locations found"
+        onChange={(_, newValue) => {
+          if (newValue) {
+            onSelect(newValue);
+          }
+        }}
+        onInputChange={(_, newInputValue) => {
+          setSearchQuery(newInputValue);
+        }}
+        renderInput={(params) => (
+          <TextField {...params} label={label} variant="outlined" fullWidth />
+        )}
+        renderOption={(props, option) => (
+          <li {...props} key={option.id}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 1,
+                width: '100%',
+                '&:hover': {
+                  backgroundColor: 'transparent',
+                },
+              }}
             >
-              {location.address}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+              <Typography fontWeight="bold" component="div">
+                {option.name}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 0.5 }}
+              >
+                {option.address}
+              </Typography>
+            </Paper>
+          </li>
+        )}
+      />
+    </Box>
   );
 }

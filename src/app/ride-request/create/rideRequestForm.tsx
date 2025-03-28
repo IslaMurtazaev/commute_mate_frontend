@@ -5,6 +5,16 @@ import { useRouter } from 'next/navigation';
 import { createRideRequest } from '../../../api/ride-requests';
 import SearchLocation, { Location } from './searchLocation';
 import { fetchLocationCoordinates } from '@/src/api/mapboxApi';
+import {
+  Box,
+  Typography,
+  Container,
+  Stack,
+  TextField,
+  Button,
+  Paper,
+  Grid,
+} from '@mui/material';
 
 export default function CreateRideRequest({ token }: { token: string }) {
   const router = useRouter();
@@ -47,8 +57,7 @@ export default function CreateRideRequest({ token }: { token: string }) {
 
     try {
       await createRideRequest(rideRequest, token);
-
-      router.push('/'); // Redirect to ride requests list
+      router.push('/');
     } catch (error) {
       console.error('Error creating ride request:', error);
       alert('Failed to create ride request');
@@ -56,54 +65,63 @@ export default function CreateRideRequest({ token }: { token: string }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Create Ride Request</h1>
+    <Container maxWidth="md">
+      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Create Ride Request
+        </Typography>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <label className="block text-sm font-medium">Start Location</label>
-        <SearchLocation
-          onSelect={setStartLocation}
-          sessionToken={sessionToken}
-        />
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Stack spacing={3}>
+            <SearchLocation
+              onSelect={setStartLocation}
+              sessionToken={sessionToken}
+              label="Start Location"
+            />
 
-        {/* End Location */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">End Location</label>
-          <SearchLocation
-            onSelect={setEndLocation}
-            sessionToken={sessionToken}
-          />
-        </div>
+            <SearchLocation
+              onSelect={setEndLocation}
+              sessionToken={sessionToken}
+              label="End Location"
+            />
 
-        {/* Time Selection */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Start Time</label>
-            <input
+            <TextField
+              fullWidth
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                },
+              }}
+              label="Start Time"
               type="datetime-local"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="w-full p-2 border rounded"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">End Time</label>
-            <input
+            <TextField
+              fullWidth
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                },
+              }}
+              label="End Time"
               type="datetime-local"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="w-full p-2 border rounded"
             />
-          </div>
-        </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
-        >
-          Create Ride Request
-        </button>
-      </form>
-    </div>
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              fullWidth
+              sx={{ mt: 2 }}
+            >
+              Create Ride Request
+            </Button>
+          </Stack>
+        </Box>
+      </Paper>
+    </Container>
   );
 }
